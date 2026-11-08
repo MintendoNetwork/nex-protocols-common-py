@@ -2,8 +2,6 @@
 
 These are designed to work on the WiiU and 3DS, switch specific features were discarded
 
-This library is only used by [mario-kart-8-python](https://github.com/PretendoNetwork/mario-kart-8-python).
-[The original repo](https://github.com/Newtendo-Network/nex_protocols_common_py) has stopped development, this fork exists to provide maintenance fixes.
 
 > [!IMPORTANT]
 > This will be updated by us (Mintendo Network) to add more protocols as this will be the main library for nex
