@@ -29,7 +29,7 @@ class CommonNATTraversalServer(nattraversal.NATTraversalServer):
                     station_url["natm"] = natm
                     station_url["natf"] = natf
                 station_url["PID"] = client.pid()
-                station_url["RVCID"] = client.client.user_cid
+                station_url["RVCID"] = client._client.user_cid
                 new_urls.append(station_url)
 
             self.sessions_db.update_one({"pid": client.pid()}, {"$set": {"urls": list(map(str, new_urls))}})
@@ -47,7 +47,7 @@ class CommonNATTraversalServer(nattraversal.NATTraversalServer):
                     0xffff0000 + client.call_id,
                     stream.get()
                 )
-                await target_client.client.send(message.encode())
+                await target_client._client.send(message.encode())
 
     async def report_nat_traversal_result(self, *args):
         pass

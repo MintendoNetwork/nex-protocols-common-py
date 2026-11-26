@@ -2,7 +2,7 @@ from nintendo.nex import rmc, secure, common
 from pymongo.collection import Collection
 from anyio import Lock
 import bson
-import datetime
+from datetime import datetime, timezone
 
 
 class CommonSecureConnectionServer(secure.SecureConnectionServer):
@@ -22,9 +22,9 @@ class CommonSecureConnectionServer(secure.SecureConnectionServer):
         self.clients = {}
 
     async def logout(self, client):
-        self.clients.pop(client.client.user_cid)
-        print("Removing disconnected player %d session ... (RVCID %d)" % (client.pid(), client.client.user_cid))
-        self.sessions_db.delete_one({"cid": client.client.user_cid})
+        self.clients.pop(client._client.user_cid)
+        print("Removing disconnected player %d session ... (RVCID %d)" % (client.pid(), client._client.user_cid))
+        self.sessions_db.delete_one({"cid": client._client.user_cid})
 
     def get_client_by_cid(self, cid: int) -> rmc.RMCClient:
         return self.clients.get(cid, None)
@@ -83,7 +83,7 @@ class CommonSecureConnectionServer(secure.SecureConnectionServer):
         """
         async with self.connection_id_lock:
             cid = self.connection_id_counter
-            client.client.user_cid = cid
+            client._client.user_cid = cid
             self.clients[cid] = client
 
             self.connection_id_counter += 1
@@ -118,14 +118,14 @@ class CommonSecureConnectionServer(secure.SecureConnectionServer):
         raise common.RMCError("Core::AccessDenied")
 
     async def register_ex(self, client: rmc.RMCClient, urls: list[common.StationURL], login_data):
-        return self.register(client, urls)
+        return await self.register(client, urls)
 
     async def test_connectivity(self, client):
         return
 
     async def update_urls(self, client: rmc.RMCClient, urls: list[common.StationURL]):
         remote_addr = client.remote_address()
-        self.set_session_for_pid(client.pid(), urls, client.client.user_cid, remote_addr)
+        self.set_session_for_pid(client.pid(), urls, client._client.user_cid, remote_addr)
 
     async def replace_url(self, client: rmc.RMCClient, url: common.StationURL, new: common.StationURL):
         self.replace_session_url_for_pid(client.pid(), url, new)
@@ -140,6 +140,6 @@ class CommonSecureConnectionServer(secure.SecureConnectionServer):
                 "report_id": report_id,
                 "report_data": bson.Binary(report_data),
                 "report_size": len(report_data),
-                "report_date": datetime.datetime.utcnow()
+                "report_date": datetime.now(timezone.utc)
             }
         }, upsert=True)

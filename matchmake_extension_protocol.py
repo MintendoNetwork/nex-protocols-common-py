@@ -191,6 +191,6 @@ class CommonMatchmakeExtensionServer(matchmaking.MatchmakeExtensionServer):
                     0xffff0000 + client.call_id,
                     stream.get()
                 )
-                await target_client.client.send(message.encode())
+                await target_client._client.send(message.encode())
 
         return created_gathering
